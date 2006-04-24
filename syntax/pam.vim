@@ -1,7 +1,9 @@
 " Vim syntax file
 " Language: Linux-PAM - Pluggable Authentication Modules
 " Maintainer: David Ne\v{c}as (Yeti) <yeti@physics.muni.cz>
-" Last Change: 2003-08-18
+" License: This file can be redistribued and/or modified under the same terms
+"          as Vim itself.
+" Last Change: 2006-04-24
 " URL: http://trific.ath.cx/Ftp/vim/syntax/pam.vim
 
 " Setup {{{
@@ -26,7 +28,7 @@ syn match pamVersionTag "%PAM-\d\+\(\.\d\+\)\+" contained
 " Base constructs {{{
 syn match pamBOL "^" nextgroup=pamType,pamComment skipwhite
 syn keyword pamType auth account password session contained nextgroup=pamControlOld skipwhite
-syn keyword pamControlOld requisite required sufficient optional contained
+syn keyword pamControlOld requisite required sufficient optional include contained
 syn region pamControlBracket start="\[" end="\]" contains=pamControl,pamAction
 syn keyword pamControl abort acct_expired auth auth_err contained
 syn keyword pamControl authinfo_unavail authtok_disable_aging contained
@@ -67,11 +69,11 @@ syn keyword pamOptionAccess accessfile
 syn keyword pamOptionChroot debug onerr
 " pam_cracklib
 syn keyword pamOptionCracklib debug type retry difok minlen dcredit
-syn keyword pamOptionCracklib ucredit lcredit ocredit use_authtok
+syn keyword pamOptionCracklib ucredit lcredit ocredit use_authtok dictpath
 " pam_env
 syn keyword pamOptionEnv debug conffile envfile readenv
 " pam_filter
-syn keyword pamOptionFilter debug new_term non_term runX
+syn keyword pamOptionFilter debug new_term non_term run1 run2
 " pam_ftp
 syn keyword pamOptionFtp debug users ignore
 " pam_issue
@@ -80,13 +82,13 @@ syn keyword pamOptionIssue issue noesc
 syn keyword pamOptionKrb4 use_first_pass try_first_pass
 " pam_lastlog
 syn keyword pamOptionLastlog debug nodate noterm nohost silent
-syn keyword pamOptionLastlog never
+syn keyword pamOptionLastlog never nowtmp
 " pam_limits
-syn keyword pamOptionLimits debug conf
+syn keyword pamOptionLimits debug conf change_uid utmp_early
 " pam_listfile
 syn keyword pamOptionListfile onerr sense file item apply
 " pam_localuser
-syn keyword pamOptionLocaluser debug passwd
+syn keyword pamOptionLocaluser debug file
 " pam_mail
 syn keyword pamOptionMail debug dir nopen close noenv empty hash
 syn keyword pamOptionMail standard quiet
@@ -94,6 +96,8 @@ syn keyword pamOptionMail standard quiet
 syn keyword pamOptionMkhomedir debug skel umask
 " pam_motd
 syn keyword pamOptionMotd debug motd
+" pam_nologin
+syn keyword pamOptionNologin file successok
 " pam_pwdv
 syn keyword pamOptionPwdb debug use_first_pass try_first_pass
 syn keyword pamOptionPwdb nullok nodelay likeauth not_set_pass
@@ -107,29 +111,43 @@ syn keyword pamOptionRhosts no_warn privategroup promiscuous
 syn keyword pamOptionRhosts suppress
 " pam_root_ok
 syn keyword pamOptionRootOk debug
+" pam_rps
+syn keyword pamOptionRps debug throw
+" pam_selinux
+syn keyword pamOptionSelinux close debug nottys verbose open
 " pam_stack
 syn keyword pamOptionStack debug service
+" pam_stress
+syn keyword pamOptionStress debug no_warn use_first_pass try_first_pass rootok
+" pam_succeed_if
+syn keyword pamOptionSucceedIf debug use_uid quiet quiet_fail quiet_success
+syn keyword pamOptionSucceedIf uid gid logic shell home
+syn keyword pamOperator eq ne ingroup notingroup innetgr notinnetgr
 " pam_tally
 syn keyword pamOptionTally onerr file no_magic_root deny reset
 syn keyword pamOptionTally no_reset even_deny_root_account
 syn keyword pamOptionTally per_user no_lock_time
+" pam_tally2
+syn keyword pamOptionTally2 onerr file audit deny lock_time unlock_time
+syn keyword pamOptionTally2 magic_root even_deny_root root_unlock_time
+syn keyword pamOptionTally2 quiet
 " pam_timestamp
 syn keyword pamOptionTimestamp debug timestampdir verbose
 syn keyword pamOptionTimestamp timestamp_timeout
 " pam_unix
 syn keyword pamOptionUnix debug audit use_first_pass md5 shadow
-syn keyword pamOptionUnix try_first_pass nullok nodelay bigcrypt
+syn keyword pamOptionUnix try_first_pass nis nullok nodelay bigcrypt
 syn keyword pamOptionUnix not_set_pass use_authtok remember
 syn keyword pamOptionUnix broken_shadow
 " Debian?
 syn keyword pamOptionUnix obscure min max
 " pam_userdb
 syn keyword pamOptionUserdb debug icase dump db use_authtok
-syn keyword pamOptionUserdb unknown_ok
+syn keyword pamOptionUserdb unknown_ok key_only
 " pam_wheel
-syn keyword pamOptionWheel debug use_uid trust deny group
+syn keyword pamOptionWheel debug use_uid trust deny group root_only
 " pam_xauth
-syn keyword pamOptionXauth debug xauthpath systemuser
+syn keyword pamOptionXauth debug xauthpath systemuser targetuser
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" }}}
 " Define the default highlighting {{{
 " For version 5.7 and earlier: Only when not done already
@@ -149,6 +167,7 @@ if version >= 508 || !exists("did_pam_syntax_inits")
   HiLink pamOptionAccess      pamOption
   HiLink pamOptionChroot      pamOption
   HiLink pamOptionCracklib    pamOption
+  HiLink pamOptionDebug       pamOption
   HiLink pamOptionEnv         pamOption
   HiLink pamOptionFilter      pamOption
   HiLink pamOptionFtp         pamOption
@@ -161,12 +180,18 @@ if version >= 508 || !exists("did_pam_syntax_inits")
   HiLink pamOptionMail        pamOption
   HiLink pamOptionMkhomedir   pamOption
   HiLink pamOptionMotd        pamOption
+  HiLink pamOptionNologin     pamOption
   HiLink pamOptionPwdb        pamOption
   HiLink pamOptionRadius      pamOption
   HiLink pamOptionRhosts      pamOption
-  HiLink pamOptionRoot        pamOption
+  HiLink pamOptionRootOk      pamOption
+  HiLink pamOptionRps         pamOption
+  HiLink pamOptionSelinux     pamOption
   HiLink pamOptionStack       pamOption
+  HiLink pamOptionStress      pamOption
+  HiLink pamOptionSucceedIf   pamOption
   HiLink pamOptionTally       pamOption
+  HiLink pamOptionTally2      pamOption
   HiLink pamOptionTimestamp   pamOption
   HiLink pamOptionUnix        pamOption
   HiLink pamOptionUserdb      pamOption
@@ -181,6 +206,7 @@ if version >= 508 || !exists("did_pam_syntax_inits")
   HiLink pamVariable          Function
   HiLink pamControlBracket    Special
   HiLink pamSpecial           Special
+  HiLink pamOperator          Operator
   delcommand HiLink
 endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" }}}
